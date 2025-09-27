@@ -17,20 +17,20 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 220 15% 15%;
 
-    /* Warm yellow primary */
-    --primary: 45 95% 55%;
-    --primary-foreground: 220 15% 15%;
-    --primary-glow: 48 100% 65%;
+    /* Vibrant yellow-gold primary */
+    --primary: 50 100% 58%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 52 100% 68%;
 
-    /* Fresh green secondary */
-    --secondary: 140 85% 45%;
+    /* Fresh emerald secondary */
+    --secondary: 158 90% 48%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-light: 140 85% 55%;
+    --secondary-light: 158 90% 58%;
 
-    /* Trusted blue accent */
-    --accent: 210 85% 55%;
+    /* Deep teal accent */
+    --accent: 186 85% 52%;
     --accent-foreground: 0 0% 100%;
-    --accent-light: 210 85% 65%;
+    --accent-light: 186 85% 62%;
 
     --muted: 48 50% 95%;
     --muted-foreground: 220 15% 45%;
@@ -94,20 +94,20 @@ All colors MUST be HSL.
     --popover: 220 15% 10%;
     --popover-foreground: 48 100% 95%;
 
-    /* Warm yellow primary - adjusted for dark mode */
-    --primary: 45 95% 60%;
+    /* Vibrant yellow-gold primary - adjusted for dark mode */
+    --primary: 50 100% 62%;
     --primary-foreground: 220 15% 8%;
-    --primary-glow: 48 100% 70%;
+    --primary-glow: 52 100% 72%;
 
-    /* Fresh green secondary - adjusted for dark mode */
-    --secondary: 140 85% 50%;
+    /* Fresh emerald secondary - adjusted for dark mode */
+    --secondary: 158 90% 52%;
     --secondary-foreground: 220 15% 8%;
-    --secondary-light: 140 85% 60%;
+    --secondary-light: 158 90% 62%;
 
-    /* Trusted blue accent - adjusted for dark mode */
-    --accent: 210 85% 60%;
+    /* Deep teal accent - adjusted for dark mode */
+    --accent: 186 85% 56%;
     --accent-foreground: 220 15% 8%;
-    --accent-light: 210 85% 70%;
+    --accent-light: 186 85% 66%;
 
     --muted: 220 15% 15%;
     --muted-foreground: 48 50% 70%;

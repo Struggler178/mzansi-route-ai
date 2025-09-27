@@ -1,15 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import LiveLocationMap from "@/components/LiveLocationMap";
 import { 
   MapPin, 
   Clock, 
   DollarSign, 
   Users, 
-  Search,
-  Navigation,
-  Star
+  Star,
+  Route,
+  TrendingUp,
+  Navigation
 } from "lucide-react";
 
 const popularRoutes = [
@@ -59,46 +60,24 @@ export default function Routes() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-2">
-              Taxi Routes & Fares
+              Live Location & Routes
             </h1>
             <p className="text-muted-foreground">
-              Discover popular routes, current fares, and travel information
+              Find your way with real-time location tracking and route planning
             </p>
           </div>
 
-          {/* Search */}
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm mb-8">
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1">
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      placeholder="From (e.g., Johannesburg CBD)" 
-                      className="pl-10 bg-background/50"
-                    />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <div className="relative">
-                    <Navigation className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      placeholder="To (e.g., Soweto)" 
-                      className="pl-10 bg-background/50"
-                    />
-                  </div>
-                </div>
-                <Button className="bg-gradient-warm hover:shadow-medium transition-all duration-200">
-                  <Search className="h-4 w-4 mr-2" />
-                  Search Routes
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Live Map */}
+          <div className="mb-8">
+            <LiveLocationMap />
+          </div>
 
           {/* Popular Routes */}
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">Popular Routes</h2>
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              <h2 className="text-xl font-semibold text-foreground">Popular Routes</h2>
+            </div>
             <div className="grid md:grid-cols-2 gap-6">
               {popularRoutes.map((route, index) => (
                 <Card key={index} className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-medium transition-all duration-200">
