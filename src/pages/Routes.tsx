@@ -33,27 +33,27 @@ const popularRoutes: Route[] = [
     duration: "30-40 min",
     distance: "20 km",
     popularity: "high",
-    taxiRank: "Park Station",
+    taxiRank: "Go to MTN taxi rank in cbd and ask a taxi marshall to direct you",
   },
   {
     id: "2",
-    from: "Sandton",
-    to: "Alexandra",
+    from: "Johannesburg",
+    to: "Kempton park",
     fare: "R15-20",
     duration: "15-20 min",
     distance: "8 km",
     popularity: "high",
-    taxiRank: "Sandton Rank",
+    taxiRank: "Outside bridge shopping complex",
   },
   {
     id: "3",
-    from: "Pretoria CBD",
-    to: "Mamelodi",
+    from: "Johannesburg",
+    to: "Welkom",
     fare: "R20-25",
     duration: "25-35 min",
     distance: "15 km",
     popularity: "medium",
-    taxiRank: "Bosman Station",
+    taxiRank: "Near universal church next to bp",
   },
   {
     id: "4",
@@ -63,17 +63,37 @@ const popularRoutes: Route[] = [
     duration: "10-15 min",
     distance: "5 km",
     popularity: "medium",
-    taxiRank: "Braamfontein Rank",
+    taxiRank: "Go to MTN taxi rank",
   },
   {
     id: "5",
-    from: "Kempton Park",
-    to: "OR Tambo Airport",
+    from: "Soweto Diepkloof",
+    to: "Northgate mall",
     fare: "R30-35",
     duration: "20-25 min",
     distance: "12 km",
     popularity: "high",
-    taxiRank: "Kempton Park Station",
+    taxiRank: "Go to bree taxi rank in downtown joburg",
+  },
+  {
+    id: "6",
+    from: "Johannesburg cbd",
+    to: "Kwathema",
+    fare: "R25-30",
+    duration: "40-55 min",
+    distance: "20 km",
+    popularity: "low",
+    taxiRank: "Near vector college in corner plein & rissik",
+  },
+   {
+    id: "7",
+    from: "Tsakane",
+    to: "Springs",
+    fare: "R25-30",
+    duration: "45-55 min",
+    distance: "20 km",
+    popularity: "low",
+    taxiRank: "Go to Duduza rank in KwaThema and ask a taxi marshall to direct you from there",
   },
 ];
 
@@ -182,7 +202,7 @@ export default function Routes() {
                         <h3 className="font-semibold text-lg">{route.to}</h3>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        Taxi Rank: {route.taxiRank}
+                        Directions: {route.taxiRank}
                       </p>
                     </div>
                   </div>

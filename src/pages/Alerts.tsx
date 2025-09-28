@@ -70,6 +70,7 @@ const mockAlerts: Alert[] = [
 export default function Alerts() {
   const [notifications, setNotifications] = useState(true);
   const [activeFilter, setActiveFilter] = useState<"all" | "active" | "resolved">("all");
+  const [severityFilter, setSeverityFilter] = useState<"all" | "high" | "medium" | "low">("all");
 
   const getAlertIcon = (type: string) => {
     switch (type) {
@@ -103,11 +104,33 @@ export default function Alerts() {
   };
 
   const filteredAlerts = mockAlerts.filter((alert) => {
-    if (activeFilter === "all") return true;
-    if (activeFilter === "active") return alert.active;
-    if (activeFilter === "resolved") return !alert.active;
+    // First filter by active/resolved status
+    if (activeFilter === "active" && !alert.active) return false;
+    if (activeFilter === "resolved" && alert.active) return false;
+    
+    // Then filter by severity if not "all"
+    if (severityFilter !== "all" && alert.severity !== severityFilter) return false;
+    
     return true;
   });
+
+  // Calculate stats
+  const criticalAlerts = mockAlerts.filter(alert => alert.severity === "high" && alert.active).length;
+  const warningAlerts = mockAlerts.filter(alert => alert.severity === "medium" && alert.active).length;
+  const resolvedAlerts = mockAlerts.filter(alert => !alert.active).length;
+
+  const handleSeverityFilter = (severity: "all" | "high" | "medium" | "low") => {
+    setSeverityFilter(severity);
+  };
+
+  const handleStatusFilter = (status: "all" | "active" | "resolved") => {
+    setActiveFilter(status);
+  };
+
+  const clearAllFilters = () => {
+    setActiveFilter("all");
+    setSeverityFilter("all");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4">
@@ -138,47 +161,90 @@ export default function Alerts() {
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 mb-4">
             <Button
               variant={activeFilter === "all" ? "default" : "outline"}
               size="sm"
-              onClick={() => setActiveFilter("all")}
+              onClick={() => handleStatusFilter("all")}
             >
               All Alerts
             </Button>
             <Button
               variant={activeFilter === "active" ? "default" : "outline"}
               size="sm"
-              onClick={() => setActiveFilter("active")}
+              onClick={() => handleStatusFilter("active")}
             >
               Active
             </Button>
             <Button
               variant={activeFilter === "resolved" ? "default" : "outline"}
               size="sm"
-              onClick={() => setActiveFilter("resolved")}
+              onClick={() => handleStatusFilter("resolved")}
             >
               Resolved
             </Button>
           </div>
+
+          {/* Clear Filters Button - Only show when filters are active */}
+          {(activeFilter !== "all" || severityFilter !== "all") && (
+            <div className="flex justify-end mb-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearAllFilters}
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          )}
         </div>
 
-        {/* Alert Stats */}
+        {/* Alert Stats - Now Clickable */}
         <div className="grid grid-cols-3 gap-4 mb-8">
-          <Card className="p-4 text-center glass-card">
+          <Card 
+            className={`p-4 text-center glass-card cursor-pointer transition-all hover:scale-105 ${
+              severityFilter === "high" ? "ring-2 ring-destructive" : ""
+            }`}
+            onClick={() => handleSeverityFilter(severityFilter === "high" ? "all" : "high")}
+          >
             <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-destructive" />
-            <p className="text-2xl font-bold">2</p>
+            <p className="text-2xl font-bold">{criticalAlerts}</p>
             <p className="text-sm text-muted-foreground">Critical Alerts</p>
+            {severityFilter === "high" && (
+              <Badge variant="secondary" className="mt-2 text-xs">
+                Active Filter
+              </Badge>
+            )}
           </Card>
-          <Card className="p-4 text-center glass-card">
+          <Card 
+            className={`p-4 text-center glass-card cursor-pointer transition-all hover:scale-105 ${
+              severityFilter === "medium" ? "ring-2 ring-warning" : ""
+            }`}
+            onClick={() => handleSeverityFilter(severityFilter === "medium" ? "all" : "medium")}
+          >
             <Info className="w-8 h-8 mx-auto mb-2 text-warning" />
-            <p className="text-2xl font-bold">1</p>
+            <p className="text-2xl font-bold">{warningAlerts}</p>
             <p className="text-sm text-muted-foreground">Warnings</p>
+            {severityFilter === "medium" && (
+              <Badge variant="secondary" className="mt-2 text-xs">
+                Active Filter
+              </Badge>
+            )}
           </Card>
-          <Card className="p-4 text-center glass-card">
+          <Card 
+            className={`p-4 text-center glass-card cursor-pointer transition-all hover:scale-105 ${
+              activeFilter === "resolved" ? "ring-2 ring-success" : ""
+            }`}
+            onClick={() => handleStatusFilter(activeFilter === "resolved" ? "all" : "resolved")}
+          >
             <CheckCircle className="w-8 h-8 mx-auto mb-2 text-success" />
-            <p className="text-2xl font-bold">1</p>
+            <p className="text-2xl font-bold">{resolvedAlerts}</p>
             <p className="text-sm text-muted-foreground">Resolved</p>
+            {activeFilter === "resolved" && (
+              <Badge variant="secondary" className="mt-2 text-xs">
+                Active Filter
+              </Badge>
+            )}
           </Card>
         </div>
 
@@ -237,8 +303,19 @@ export default function Alerts() {
             <CheckCircle className="w-12 h-12 mx-auto mb-4 text-success" />
             <h3 className="text-lg font-semibold mb-2">No alerts to show</h3>
             <p className="text-muted-foreground">
-              All clear! No active alerts in your area.
+              {activeFilter !== "all" || severityFilter !== "all" 
+                ? "No alerts match your current filters." 
+                : "All clear! No active alerts in your area."}
             </p>
+            {(activeFilter !== "all" || severityFilter !== "all") && (
+              <Button 
+                variant="outline" 
+                className="mt-4"
+                onClick={clearAllFilters}
+              >
+                Clear Filters
+              </Button>
+            )}
           </Card>
         )}
       </div>
