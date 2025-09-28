@@ -100,6 +100,73 @@ export function ChatInterface() {
         navigationUrl,
       };
     }
+    if (lowerQuery.includes("braamfontein") && lowerQuery.includes("tsakane")) {
+      // Build Google Maps deep link
+      const start = "Braamfontein, Johannesburg";
+      const stop = "Plein and Rissik Corner, Johannesburg CBD";
+      const destination = "Tsakane, Brakpan";
+      const navigationUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
+        start
+      )}&waypoints=${encodeURIComponent(stop)}&destination=${encodeURIComponent(destination)}&travelmode=driving`;
+
+      return {
+        text:
+          "🚕 From Braamfontein to Tsakane:\n\n" +
+          "📍 **Catch a taxi at:**Plein and Rissik Corner, Johannesburg CBD \n" +
+          "💰 **Fare:** R26\n" +
+          "⏱️ **Travel time:** 35-45 minutes\n" +
+          "🛤️ **Route:** Via N17\n\n" +
+          "⚠️ **Tip:** Evening rush hour (17:30-19:00) may add 10-20 minutes.\n\n" +
+          "👉 Tap below to open this route in Google Maps.",
+        navigationUrl,
+      };
+    }
+
+
+     
+    if (lowerQuery.includes("midrand") && lowerQuery.includes("sandton")) {
+      // Build Google Maps deep link
+      const start = "Midrand, Johannesburg";
+      const stop = "Midrand Market & Taxi Rank, Johannesburg ";
+      const destination = "Sandton";
+      const navigationUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
+        start
+      )}&waypoints=${encodeURIComponent(stop)}&destination=${encodeURIComponent(destination)}&travelmode=driving`;
+
+      return {
+        text:
+          " Congratulation on your new Job 🥳 !!! \n\n" +
+          "📍 **Catch a taxi at:**Midrand Market & Taxi Rank, Johannesburg \n" +
+          "💰 **Fare:** R26\n" +
+          "⏱️ **Travel time:** 20-35 minutes\n" +
+          "🛤️ **Route:** Via N17\n\n" +
+          "⚠️ **Tip:** Evening rush hour (17:30-19:00) may add 10-20 minutes. Be safe 😊\n\n" +
+          "👉 Tap below to open this route in Google Maps.",
+        navigationUrl,
+      };
+    }
+    if (lowerQuery.includes("midrand") && lowerQuery.includes("alexandra")) {
+      // Build Google Maps deep link
+      const start = "Midrand, Johannesburg";
+      const stop = "Midrand Market & Taxi Rank, Johannesburg ";
+      const destination = "Alexandra";
+      const navigationUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
+        start
+      )}&waypoints=${encodeURIComponent(stop)}&destination=${encodeURIComponent(destination)}&travelmode=driving`;
+
+      return {
+        text:
+          " 🚨🚨🚨 There is report of unrest in Alexandra, please be safe. \n\n" +
+          "📍 CATCH A TAXI AT:Midrand Market & Taxi Rank, Johannesburg \n" +
+          "💰 FARE: R26\n" +
+          "⏱️ TRAVEL TIME: 20-35 minutes\n" +
+          "🛤️ ROUTE: Via N17\n\n" +
+          "⚠️ TIP: Evening rush hour (17:30-19:00) may add 10-20 minutes. Be safe 😊\n\n" +
+          "👉 Tap below to open this route in Google Maps.",
+        navigationUrl,
+      };
+    }
+    
 
     if (lowerQuery.includes("safe") || lowerQuery.includes("night")) {
       return {

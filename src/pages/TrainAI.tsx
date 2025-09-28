@@ -118,17 +118,17 @@ export default function TrainAI() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card className="p-4 text-center glass-card">
             <Users className="w-8 h-8 mx-auto mb-2 text-primary" />
-            <p className="text-2xl font-bold">1,234</p>
+            <p className="text-2xl font-bold">4</p>
             <p className="text-sm text-muted-foreground">Contributors</p>
           </Card>
           <Card className="p-4 text-center glass-card">
             <CheckCircle className="w-8 h-8 mx-auto mb-2 text-success" />
-            <p className="text-2xl font-bold">892</p>
+            <p className="text-2xl font-bold">2</p>
             <p className="text-sm text-muted-foreground">Verified Updates</p>
           </Card>
           <Card className="p-4 text-center glass-card">
             <MapPin className="w-8 h-8 mx-auto mb-2 text-secondary" />
-            <p className="text-2xl font-bold">156</p>
+            <p className="text-2xl font-bold">15</p>
             <p className="text-sm text-muted-foreground">New Routes</p>
           </Card>
           <Card className="p-4 text-center glass-card">
