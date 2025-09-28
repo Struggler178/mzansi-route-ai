@@ -1,0 +1,182 @@
+{
+  "taxiRanks": {
+    "johannesburg": [
+      {
+        "name": "Bree Taxi Rank",
+        "location": "Bree Street, Johannesburg CBD",
+        "coordinates": [-26.2041, 28.0473],
+        "destinations": ["Katlehong", "Soweto", "Alexandra", "Randburg", "Roodepoort"],
+        "operatingHours": "05:00-22:00",
+        "safety": "high",
+        "landmarks": ["Carlton Centre nearby", "Gandhi Square"]
+      },
+      {
+        "name": "Park Station Taxi Rank",
+        "location": "Park Station, Johannesburg",
+        "coordinates": [-26.1956, 28.0436],
+        "destinations": ["All major townships", "Long distance routes"],
+        "operatingHours": "24/7",
+        "safety": "medium",
+        "landmarks": ["Park Station building", "Newtown Cultural Precinct"]
+      },
+      {
+        "name": "Noord Taxi Rank",
+        "location": "Noord Street, Johannesburg CBD",
+        "coordinates": [-26.1984, 28.0436],
+        "destinations": ["Alexandra", "Sandton", "Midrand"],
+        "operatingHours": "05:00-21:00",
+        "safety": "medium",
+        "landmarks": ["Near Johannesburg Hospital"]
+      }
+    ],
+    "cape_town": [
+      {
+        "name": "Golden Arrow Terminus",
+        "location": "Strand Street, Cape Town CBD",
+        "coordinates": [-33.9249, 18.4241],
+        "destinations": ["Khayelitsha", "Mitchells Plain", "Gugulethu"],
+        "operatingHours": "05:00-22:00",
+        "safety": "high",
+        "landmarks": ["Castle of Good Hope", "Grand Parade"]
+      },
+      {
+        "name": "Nyanga Junction",
+        "location": "Nyanga, Cape Town",
+        "coordinates": [-34.0275, 18.4744],
+        "destinations": ["Cape Town CBD", "Khayelitsha", "Langa"],
+        "operatingHours": "04:30-22:30",
+        "safety": "medium",
+        "landmarks": ["Nyanga Mall"]
+      }
+    ],
+    "durban": [
+      {
+        "name": "Brook Street Taxi Rank",
+        "location": "Brook Street, Durban CBD",
+        "coordinates": [-29.8587, 31.0218],
+        "destinations": ["KwaMashu", "Umlazi", "Chatsworth", "Phoenix"],
+        "operatingHours": "05:00-21:00",
+        "safety": "medium",
+        "landmarks": ["Durban City Hall", "Golden Mile beachfront"]
+      }
+    ]
+  },
+  "routes": [
+    {
+      "from": "Johannesburg CBD",
+      "to": "Soweto",
+      "taxiRank": "Bree Taxi Rank",
+      "fare": {"min": 15, "max": 20, "currency": "ZAR"},
+      "duration": "45-60 minutes",
+      "distance": "25 km",
+      "frequency": "Every 5-10 minutes",
+      "peak_hours": ["06:30-09:00", "16:30-19:00"],
+      "route_description": "Via New Canada Road and Chris Hani Road",
+      "safety_tips": ["Avoid carrying valuables", "Sit near the driver", "Travel in groups after dark"]
+    },
+    {
+      "from": "Johannesburg CBD",
+      "to": "Alexandra",
+      "taxiRank": "Noord Taxi Rank",
+      "fare": {"min": 12, "max": 18, "currency": "ZAR"},
+      "duration": "30-45 minutes",
+      "distance": "15 km",
+      "frequency": "Every 5-15 minutes",
+      "peak_hours": ["06:30-09:00", "16:30-19:00"],
+      "route_description": "Via London Road and M1 North",
+      "safety_tips": ["Peak hours are very crowded", "Keep belongings secure"]
+    },
+    {
+      "from": "Sandton",
+      "to": "Johannesburg CBD",
+      "taxiRank": "Sandton Taxi Rank",
+      "fare": {"min": 18, "max": 25, "currency": "ZAR"},
+      "duration": "35-50 minutes",
+      "distance": "20 km",
+      "frequency": "Every 10-15 minutes",
+      "peak_hours": ["06:30-09:00", "16:30-19:00"],
+      "route_description": "Via M1 South and Pritchard Street",
+      "safety_tips": ["More expensive but safer route", "Well-maintained taxis"]
+    },
+    {
+      "from": "Cape Town CBD",
+      "to": "Khayelitsha",
+      "taxiRank": "Golden Arrow Terminus",
+      "fare": {"min": 15, "max": 22, "currency": "ZAR"},
+      "duration": "45-60 minutes",
+      "distance": "30 km",
+      "frequency": "Every 8-12 minutes",
+      "peak_hours": ["06:00-08:30", "16:00-18:30"],
+      "route_description": "Via N2 and Khayelitsha Way",
+      "safety_tips": ["Very busy route", "Keep valuables hidden", "Avoid late night travel"]
+    },
+    {
+      "from": "Durban CBD",
+      "to": "Umlazi",
+      "taxiRank": "Brook Street Taxi Rank",
+      "fare": {"min": 12, "max": 18, "currency": "ZAR"},
+      "duration": "30-45 minutes",
+      "distance": "18 km",
+      "frequency": "Every 10-15 minutes",
+      "peak_hours": ["06:30-08:30", "16:30-18:30"],
+      "route_description": "Via Edwin Swales and Prince Mshiyeni Memorial Road",
+      "safety_tips": ["Crowded during peak hours", "Popular route"]
+    }
+  ],
+  "safetyGuidelines": {
+    "general": [
+      "Always check the taxi's roadworthiness before boarding",
+      "Sit near the driver or door for quick exit",
+      "Keep your phone charged and share location with someone",
+      "Carry exact change when possible",
+      "Trust your instincts - if something feels wrong, find alternative transport"
+    ],
+    "night_travel": [
+      "Avoid traveling alone after 10 PM",
+      "Use well-lit, busy taxi ranks",
+      "Consider alternative transport like Uber for late night trips",
+      "Stay alert and avoid displaying expensive items"
+    ],
+    "peak_hours": [
+      "Allow extra time for travel during rush hours",
+      "Expect crowded conditions",
+      "Keep bags and belongings secure",
+      "Be patient as taxis may take longer to fill up"
+    ]
+  },
+  "fareStructure": {
+    "factors": [
+      "Distance traveled",
+      "Time of day (peak hours may cost more)",
+      "Day of the week",
+      "Fuel prices",
+      "Route popularity"
+    ],
+    "typical_ranges": {
+      "short_distance": {"range": "5-15 km", "fare": "R8-R15"},
+      "medium_distance": {"range": "15-30 km", "fare": "R15-R30"},
+      "long_distance": {"range": "30+ km", "fare": "R30-R60"}
+    },
+    "payment_tips": [
+      "Have exact change ready",
+      "Small denomination notes preferred",
+      "Some taxis accept mobile payments",
+      "Negotiate fare before long trips"
+    ]
+  },
+  "cultural_context": {
+    "etiquette": [
+      "Greet the driver when entering",
+      "Make room for other passengers",
+      "Pass money forward to the driver",
+      "Signal your stop clearly",
+      "Say 'thank you' when exiting"
+    ],
+    "common_phrases": {
+      "stop_here": "Stop hier asseblief / Ngi funa ukwehlisa lapha",
+      "how_much": "Malini? / How much?",
+      "thank_you": "Dankie / Ngiyabonga",
+      "excuse_me": "Jammer / Uxolo"
+    }
+  }
+}

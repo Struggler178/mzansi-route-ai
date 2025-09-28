@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Bot, User, MapPin, DollarSign, Shield } from "lucide-react";
+import { Send, Bot, User, MapPin, DollarSign, Shield, Navigation } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -11,6 +11,12 @@ interface Message {
   type: "user" | "bot";
   content: string;
   timestamp: Date;
+}
+
+interface LocationData {
+  currentLocation: string;
+  destination: string;
+  coordinates?: { lat: number; lng: number };
 }
 
 const suggestions = [
@@ -25,12 +31,17 @@ export function ChatInterface() {
     {
       id: "1",
       type: "bot",
-      content: "Sawubona! 👋 I'm your TaxiConnect assistant. Ask me about routes, fares, or safety tips. How can I help you today?",
+      content: "Sawubona! 👋 I'm your TaxiConnect assistant with access to real South African taxi routes and training data. Ask me about routes, fares, or safety tips. How can I help you today?",
       timestamp: new Date(),
     },
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [locationData, setLocationData] = useState<LocationData>({
+    currentLocation: "",
+    destination: "",
+  });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,7 +50,112 @@ export function ChatInterface() {
     }
   }, [messages]);
 
-  const handleSend = () => {
+  // Get user's current location
+  const getCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        type: "bot",
+        content: "❌ Geolocation is not supported by your browser. Please enter your location manually.",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      return;
+    }
+
+    setIsGettingLocation(true);
+    
+    const loadingMessage: Message = {
+      id: Date.now().toString(),
+      type: "bot",
+      content: "🌍 Getting your current location...",
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, loadingMessage]);
+
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 300000
+        });
+      });
+
+      const { latitude, longitude } = position.coords;
+      
+      // Try reverse geocoding
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=14&addressdetails=1`
+        );
+        const data = await response.json();
+        let address = `Coordinates: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+        
+        if (data && data.display_name) {
+          const addressParts = data.display_name.split(',');
+          address = addressParts.slice(0, 3).join(', ').trim();
+        }
+        
+        setLocationData(prev => ({
+          ...prev,
+          currentLocation: address,
+          coordinates: { lat: latitude, lng: longitude }
+        }));
+
+        // Replace loading message with success
+        setMessages(prev => prev.slice(0, -1).concat([{
+          id: Date.now().toString(),
+          type: "bot",
+          content: `📍 I've detected your location as: ${address}\n\nNow I can provide more accurate route information! What would you like to know?`,
+          timestamp: new Date()
+        }]));
+
+      } catch (geocodeError) {
+        const coords = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+        setLocationData(prev => ({
+          ...prev,
+          currentLocation: coords,
+          coordinates: { lat: latitude, lng: longitude }
+        }));
+
+        setMessages(prev => prev.slice(0, -1).concat([{
+          id: Date.now().toString(),
+          type: "bot",
+          content: `📍 Got your GPS coordinates: ${coords}\n\nI can now provide location-based route advice!`,
+          timestamp: new Date()
+        }]));
+      }
+
+    } catch (error: any) {
+      let errorMessage = "Unable to get your location. ";
+      
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          errorMessage += "Location access was denied. Please enable location services.";
+          break;
+        case error.POSITION_UNAVAILABLE:
+          errorMessage += "Your location is currently unavailable.";
+          break;
+        case error.TIMEOUT:
+          errorMessage += "Location request timed out.";
+          break;
+        default:
+          errorMessage += "Please enter your location manually.";
+      }
+      
+      setMessages(prev => prev.slice(0, -1).concat([{
+        id: Date.now().toString(),
+        type: "bot",
+        content: `❌ ${errorMessage}`,
+        timestamp: new Date()
+      }]));
+    } finally {
+      setIsGettingLocation(false);
+    }
+  };
+
+  const handleSend = async () => {
     if (!input.trim()) return;
 
     const userMessage: Message = {
@@ -50,38 +166,50 @@ export function ChatInterface() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const messageToSend = input;
     setInput("");
     setIsTyping(true);
 
-    // Simulate bot response
-    setTimeout(() => {
-      const botResponse: Message = {
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: messageToSend,
+          currentLocation: locationData.currentLocation,
+          destination: locationData.destination,
+          coordinates: locationData.coordinates
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: "bot",
-        content: getBotResponse(input),
-        timestamp: new Date(),
+        content: data.reply || "Sorry, I couldn't process that request. Please try again.",
+        timestamp: new Date()
       };
-      setMessages((prev) => [...prev, botResponse]);
+      
+      setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      console.error('Error calling API:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: "bot",
+        content: "Sorry, I'm having trouble connecting to my training data. The backend server might be down. Please check that the server is running on port 3000. 🔄",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
-  };
-
-  const getBotResponse = (query: string) => {
-    const lowerQuery = query.toLowerCase();
-    
-    if (lowerQuery.includes("braamfontein") && lowerQuery.includes("honeydew")) {
-      return "🚕 From Braamfontein to Honeydew:\n\n📍 **Nearest taxi rank:** Braamfontein Taxi Rank (corner Juta & De Korte St)\n💰 **Fare:** R25-30\n⏱️ **Travel time:** 35-45 minutes\n🛤️ **Route:** Via Republic Rd and Beyers Naude Dr\n\n⚠️ **Tip:** Morning rush hour (6:30-9:00) may add 15-20 minutes to your journey.";
     }
-    
-    if (lowerQuery.includes("safe") || lowerQuery.includes("night")) {
-      return "🛡️ **Safety Tips for Night Travel:**\n\n✅ Travel in groups when possible\n✅ Use well-known taxi ranks\n✅ Keep valuables hidden\n✅ Share your trip details with someone\n✅ Sit near the driver\n✅ Trust your instincts\n\n📱 Emergency: Save 10111 (Police) and 10177 (Ambulance) in your phone.";
-    }
-    
-    if (lowerQuery.includes("fare") || lowerQuery.includes("price") || lowerQuery.includes("cost")) {
-      return "💰 **Common Taxi Fares:**\n\n• Short distance (5-10km): R12-15\n• Medium distance (10-20km): R20-30\n• Long distance (20km+): R35-50\n\n💡 **Note:** Fares may vary based on time of day and specific routes. Always confirm with the driver before boarding.";
-    }
-    
-    return "I understand you're asking about: \"" + query + "\". Let me help you with taxi information. You can ask me about:\n\n📍 Routes and directions\n💰 Fare estimates\n🛡️ Safety tips\n⏱️ Travel times\n🚕 Nearest taxi ranks\n\nWhat specific information would you like?";
   };
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -93,16 +221,48 @@ export function ChatInterface() {
       <Card className="flex-1 flex flex-col overflow-hidden shadow-xl">
         {/* Chat Header */}
         <div className="bg-gradient-to-r from-secondary to-primary p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
-              <Bot className="w-6 h-6 text-white" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+                <Bot className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-white font-semibold">TaxiConnect Assistant</h2>
+                <p className="text-white/80 text-sm">Now with training data & location features</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-white font-semibold">TaxiConnect Assistant</h2>
-              <p className="text-white/80 text-sm">Always here to help you travel safely</p>
-            </div>
+            <Button
+              onClick={getCurrentLocation}
+              disabled={isGettingLocation}
+              variant="outline"
+              size="sm"
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 disabled:opacity-50"
+            >
+              <Navigation className="w-4 h-4 mr-2" />
+              {isGettingLocation ? "Getting..." : "My Location"}
+            </Button>
           </div>
         </div>
+
+        {/* Location Info Display */}
+        {(locationData.currentLocation || locationData.destination) && (
+          <div className="px-4 py-2 bg-muted/50 border-b border-border">
+            <div className="flex flex-wrap gap-2 text-xs">
+              {locationData.currentLocation && (
+                <div className="flex items-center gap-1 px-2 py-1 bg-primary/10 rounded-full">
+                  <MapPin className="w-3 h-3 text-primary" />
+                  <span className="text-primary">From: {locationData.currentLocation}</span>
+                </div>
+              )}
+              {locationData.destination && (
+                <div className="flex items-center gap-1 px-2 py-1 bg-secondary/10 rounded-full">
+                  <MapPin className="w-3 h-3 text-secondary" />
+                  <span className="text-secondary">To: {locationData.destination}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Messages */}
         <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
