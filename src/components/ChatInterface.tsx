@@ -45,7 +45,7 @@ export function ChatInterface() {
     setMessages((prev) => [...prev, msg]);
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
 
     const userMessage: Message = {
@@ -60,20 +60,147 @@ export function ChatInterface() {
     setInput("");
     setIsTyping(true);
 
-    setTimeout(() => {
-      const { text, navigationUrl } = getBotResponse(query);
+    // First check if we have a hardcoded response (offline mode)
+    const hardcodedResponse = getBotResponse(query);
+    
+    if (hardcodedResponse.navigationUrl || isKnownRoute(query)) {
+      // Use hardcoded response for known routes
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: "bot",
+        content: hardcodedResponse.text,
+        timestamp: new Date(),
+        navigationUrl: hardcodedResponse.navigationUrl,
+      };
+
+      setTimeout(() => {
+        addMessage(botMessage);
+        setIsTyping(false);
+      }, 1200);
+      return;
+    }
+
+    try {
+      // Make API call to backend for unknown routes
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: query,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get response from server');
+      }
+
+      const data = await response.json();
+      const botResponse = data.reply || "I'm having trouble processing your request right now. Please try again.";
+
+      // Check if the response contains route information and create a Google Maps link
+      const navigationUrl = extractNavigationUrl(botResponse, query);
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: "bot",
-        content: text,
+        content: botResponse,
         timestamp: new Date(),
-        navigationUrl, // if exists, attach deep link
+        navigationUrl,
       };
 
       addMessage(botMessage);
+    } catch (error) {
+      console.error('Chat API error:', error);
+      
+      // Fallback to local responses if API fails
+      const { text, navigationUrl } = getBotResponse(query);
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: "bot",
+        content: `⚠️ Using offline mode: ${text}`,
+        timestamp: new Date(),
+        navigationUrl,
+      };
+
+      addMessage(botMessage);
+    } finally {
       setIsTyping(false);
-    }, 1200);
+    }
+  };
+
+  // Helper function to check if we have a known route with hardcoded data
+  const isKnownRoute = (query: string) => {
+    const lowerQuery = query.toLowerCase();
+    return (
+      (lowerQuery.includes("braamfontein") && lowerQuery.includes("honeydew")) ||
+      (lowerQuery.includes("braamfontein") && lowerQuery.includes("tsakane")) ||
+      (lowerQuery.includes("midrand") && lowerQuery.includes("sandton")) ||
+      (lowerQuery.includes("midrand") && lowerQuery.includes("alexandra"))
+    );
+  };
+
+  // Helper function to extract location info and create Google Maps URL
+  const extractNavigationUrl = (responseText: string, query: string) => {
+    // Check if response already contains a Google Maps link
+    const mapsLinkMatch = responseText.match(/https:\/\/(?:www\.)?google\.com\/maps[^\s)]+/);
+    if (mapsLinkMatch) {
+      return mapsLinkMatch[0];
+    }
+
+    const lowerQuery = query.toLowerCase();
+    const lowerResponse = responseText.toLowerCase();
+    
+    // Extract locations from common patterns in the query
+    let fromLocation = null;
+    let toLocation = null;
+
+    // Pattern: "from X to Y"
+    const fromToMatch = lowerQuery.match(/from\s+([^to]+)\s+to\s+(.+)/);
+    if (fromToMatch) {
+      fromLocation = fromToMatch[1].trim();
+      toLocation = fromToMatch[2].trim();
+    } else {
+      // Pattern: "X to Y"
+      const simpleToMatch = lowerQuery.match(/^([^to]+)\s+to\s+(.+)/);
+      if (simpleToMatch) {
+        fromLocation = simpleToMatch[1].trim();
+        toLocation = simpleToMatch[2].trim();
+      } else {
+        // Pattern: "where can I get a taxi to Y"
+        const whereToMatch = lowerQuery.match(/where.*(?:can.*get.*taxi|taxi).*to\s+(.+)/);
+        if (whereToMatch) {
+          toLocation = whereToMatch[1].trim();
+        }
+      }
+    }
+
+    // Try to extract locations from the response if not found in query
+    if (!fromLocation || !toLocation) {
+      // Look for location patterns in the response
+      const responseFromMatch = lowerResponse.match(/from\s+([^to\n]+)/);
+      const responseToMatch = lowerResponse.match(/to\s+([^\n,:.]+)/);
+      
+      if (responseFromMatch && !fromLocation) {
+        fromLocation = responseFromMatch[1].trim();
+      }
+      if (responseToMatch && !toLocation) {
+        toLocation = responseToMatch[1].trim();
+      }
+    }
+    
+    // Create Google Maps URL if we have both locations
+    if (fromLocation && toLocation) {
+      return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(fromLocation)}&destination=${encodeURIComponent(toLocation)}&travelmode=driving`;
+    }
+    
+    // Create URL with just destination if we only have that
+    if (toLocation) {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(toLocation)}`;
+    }
+    
+    return undefined;
   };
 
   const getBotResponse = (query: string) => {
@@ -205,6 +332,21 @@ export function ChatInterface() {
     setInput(suggestion);
   };
 
+  // Helper function to render text with bold formatting
+  const renderMessageContent = (content: string) => {
+    // Split text by **bold** patterns and render appropriately
+    const parts = content.split(/(\*\*.*?\*\*)/g);
+    
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        // Remove the ** and render as bold
+        const boldText = part.slice(2, -2);
+        return <strong key={index}>{boldText}</strong>;
+      }
+      return part;
+    });
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-5rem)] max-w-4xl mx-auto p-4">
       <Card className="flex-1 flex flex-col overflow-hidden shadow-xl">
@@ -254,7 +396,9 @@ export function ChatInterface() {
                       : "bg-primary text-primary-foreground"
                   )}
                 >
-                  <p className="text-sm whitespace-pre-line">{message.content}</p>
+                  <p className="text-sm whitespace-pre-line">
+                    {renderMessageContent(message.content)}
+                  </p>
 
                   {/* ✅ Add "Open in Google Maps" button */}
                   {message.navigationUrl && (
@@ -321,9 +465,9 @@ export function ChatInterface() {
         {/* Input */}
         <div className="border-t border-border p-4">
           <form
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
-              handleSend();
+              await handleSend();
             }}
             className="flex gap-2"
           >
