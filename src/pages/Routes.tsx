@@ -202,7 +202,7 @@ export default function Routes() {
                         <h3 className="font-semibold text-lg">{route.to}</h3>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        Taxi Rank: {route.taxiRank}
+                        Directions: {route.taxiRank}
                       </p>
                     </div>
                   </div>
