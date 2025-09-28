@@ -62,21 +62,21 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-hero opacity-60"></div>
         </div>
         
-        <div className="relative z-10 container mx-auto px-4 py-16 md:py-24">
+        <div className="relative z-10 px-4 py-16 md:py-24">
           <div className="max-w-4xl mx-auto text-center">
             <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
               <Zap className="w-3 h-3 mr-1" />
               AI-Powered Transport Assistant
             </Badge>
             
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight">
               Smart Taxi Travel
               <span className="block text-transparent bg-gradient-warm bg-clip-text">
                 Made Simple
               </span>
             </h1>
             
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
               Get real-time routes, fares, and safety information for South African taxis. 
               Travel smarter, safer, and with confidence.
             </p>
@@ -94,27 +94,25 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="container mx-auto px-4 py-12">
+      <div className="py-12">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Stats Cards */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {stats.map((stat, index) => (
                 <Card key={index} className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-medium transition-all duration-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="p-2 rounded-lg bg-gradient-primary/10">
-                          <stat.icon className="h-4 w-4 text-primary" />
-                        </div>
+                  <CardContent className="p-3 md:p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="p-2 rounded-lg bg-gradient-primary/10">
+                        <stat.icon className="h-3 w-3 md:h-4 md:w-4 text-primary" />
                       </div>
                       <Badge variant="outline" className="text-xs text-success border-success/20">
                         {stat.trend}
                       </Badge>
                     </div>
-                    <p className="text-2xl font-bold text-foreground mt-2">{stat.value}</p>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
+                    <p className="text-lg md:text-2xl font-bold text-foreground">{stat.value}</p>
+                    <p className="text-xs md:text-sm text-muted-foreground">{stat.label}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -124,17 +122,17 @@ export default function Home() {
             <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
                     <TrendingUp className="h-5 w-5 text-primary" />
                     Recent Alerts & Updates
                   </CardTitle>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="hidden sm:flex">
                     View All
                     <ArrowRight className="ml-1 h-3 w-3" />
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="p-6 pt-0">
+              <CardContent className="p-4 md:p-6 pt-0">
                 <div className="space-y-4">
                   {recentAlerts.map((alert, index) => (
                     <AlertCard key={index} {...alert} />

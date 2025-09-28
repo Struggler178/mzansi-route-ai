@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Send, Bot, User } from "lucide-react";
+import { Send, Bot, User, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,6 +10,8 @@ interface Message {
   type: "user" | "bot";
   content: string;
   timestamp: Date;
+  showNavigate?: boolean;
+  destination?: string;
 }
 
 const quickQuestions = [
@@ -45,13 +47,21 @@ export function ChatInterface() {
     setInputValue("");
     setIsTyping(true);
 
-    // Simulate AI response
+    // Simulate AI response with route information
     setTimeout(() => {
+      const isRouteQuery = userMessage.content.toLowerCase().includes('route') || 
+                          userMessage.content.toLowerCase().includes('taxi') ||
+                          userMessage.content.toLowerCase().includes('to ');
+      
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: "bot",
-        content: "I understand you're looking for transport information. Currently, I'm in training mode - our team is working hard to connect me with real-time taxi data. Soon I'll be able to help you with live routes, fares, and safety updates! 🚐✨",
-        timestamp: new Date()
+        content: isRouteQuery 
+          ? "🚐 Route to Sandton City: Take a taxi from Bree Street Taxi Rank. Fare: R15-20. Duration: ~25 minutes. This route is safe and frequently used."
+          : "I understand you're looking for transport information. Currently, I'm in training mode - our team is working hard to connect me with real-time taxi data. Soon I'll be able to help you with live routes, fares, and safety updates! 🚐✨",
+        timestamp: new Date(),
+        showNavigate: isRouteQuery,
+        destination: isRouteQuery ? "Sandton City" : undefined
       };
       setMessages(prev => [...prev, botMessage]);
       setIsTyping(false);
@@ -60,6 +70,12 @@ export function ChatInterface() {
 
   const handleQuickQuestion = (question: string) => {
     setInputValue(question);
+  };
+
+  const handleNavigate = (destination: string) => {
+    // Open Google Maps with directions
+    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}&travelmode=transit`;
+    window.open(googleMapsUrl, '_blank');
   };
 
   return (
@@ -106,6 +122,19 @@ export function ChatInterface() {
                 >
                   {message.content}
                 </div>
+                {message.showNavigate && message.destination && (
+                  <div className="mt-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleNavigate(message.destination!)}
+                      className="gap-2 hover:bg-primary hover:text-primary-foreground transition-colors"
+                    >
+                      <Navigation className="h-3 w-3" />
+                      Navigate
+                    </Button>
+                  </div>
+                )}
                 <p className="mt-1 text-xs text-muted-foreground">
                   {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>

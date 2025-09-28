@@ -25,17 +25,19 @@ const App = () => (
           <Header />
           <div className="flex w-full">
             <Sidebar />
-            <main className="flex-1 md:ml-72">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/chat" element={<Chat />} />
-                <Route path="/routes" element={<RoutesPage />} />
-                <Route path="/alerts" element={<Alerts />} />
-                <Route path="/train-ai" element={<TrainAI />} />
-                <Route path="/settings" element={<Settings />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+            <main className="flex-1 ml-0 md:ml-72 transition-all duration-300">
+              <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-7xl">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/chat" element={<Chat />} />
+                  <Route path="/routes" element={<RoutesPage />} />
+                  <Route path="/alerts" element={<Alerts />} />
+                  <Route path="/train-ai" element={<TrainAI />} />
+                  <Route path="/settings" element={<Settings />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </div>
             </main>
           </div>
         </div>

@@ -8,39 +8,39 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 48 100% 99%;
-    --foreground: 220 15% 15%;
+    --background: 0 0% 100%;
+    --foreground: 222 84% 5%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 15% 15%;
+    --card-foreground: 222 84% 5%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 15%;
+    --popover-foreground: 222 84% 5%;
 
-    /* Vibrant yellow-gold primary */
-    --primary: 50 100% 58%;
+    /* Professional deep blue primary */
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 52 100% 68%;
+    --primary-glow: 217 91% 70%;
 
-    /* Fresh emerald secondary */
-    --secondary: 158 90% 48%;
+    /* Vibrant teal secondary */
+    --secondary: 173 80% 40%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-light: 158 90% 58%;
+    --secondary-light: 173 80% 50%;
 
-    /* Deep teal accent */
-    --accent: 186 85% 52%;
+    /* Warm orange accent */
+    --accent: 25 95% 53%;
     --accent-foreground: 0 0% 100%;
-    --accent-light: 186 85% 62%;
+    --accent-light: 25 95% 63%;
 
-    --muted: 48 50% 95%;
-    --muted-foreground: 220 15% 45%;
+    --muted: 210 40% 98%;
+    --muted-foreground: 215 16% 47%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 48 30% 90%;
-    --input: 48 30% 95%;
-    --ring: 45 95% 55%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 60%;
 
     --warning: 35 95% 60%;
     --warning-foreground: 220 15% 15%;
@@ -85,39 +85,39 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 220 15% 8%;
-    --foreground: 48 100% 95%;
+    --background: 222 84% 5%;
+    --foreground: 0 0% 100%;
 
-    --card: 220 15% 10%;
-    --card-foreground: 48 100% 95%;
+    --card: 222 84% 8%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 220 15% 10%;
-    --popover-foreground: 48 100% 95%;
+    --popover: 222 84% 8%;
+    --popover-foreground: 0 0% 100%;
 
-    /* Vibrant yellow-gold primary - adjusted for dark mode */
-    --primary: 50 100% 62%;
-    --primary-foreground: 220 15% 8%;
-    --primary-glow: 52 100% 72%;
+    /* Professional deep blue primary - adjusted for dark mode */
+    --primary: 217 91% 65%;
+    --primary-foreground: 222 84% 5%;
+    --primary-glow: 217 91% 75%;
 
-    /* Fresh emerald secondary - adjusted for dark mode */
-    --secondary: 158 90% 52%;
-    --secondary-foreground: 220 15% 8%;
-    --secondary-light: 158 90% 62%;
+    /* Vibrant teal secondary - adjusted for dark mode */
+    --secondary: 173 80% 45%;
+    --secondary-foreground: 222 84% 5%;
+    --secondary-light: 173 80% 55%;
 
-    /* Deep teal accent - adjusted for dark mode */
-    --accent: 186 85% 56%;
-    --accent-foreground: 220 15% 8%;
-    --accent-light: 186 85% 66%;
+    /* Warm orange accent - adjusted for dark mode */
+    --accent: 25 95% 58%;
+    --accent-foreground: 222 84% 5%;
+    --accent-light: 25 95% 68%;
 
-    --muted: 220 15% 15%;
-    --muted-foreground: 48 50% 70%;
+    --muted: 217 32% 17%;
+    --muted-foreground: 215 20% 65%;
 
     --destructive: 0 84% 65%;
-    --destructive-foreground: 220 15% 8%;
+    --destructive-foreground: 222 84% 5%;
 
-    --border: 220 15% 20%;
-    --input: 220 15% 15%;
-    --ring: 45 95% 60%;
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 217 91% 65%;
 
     --warning: 35 95% 65%;
     --warning-foreground: 220 15% 8%;
