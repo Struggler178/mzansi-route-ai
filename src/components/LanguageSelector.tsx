@@ -1,47 +1,53 @@
-import { useState } from "react";
-import { Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Card } from "@/components/ui/card";
+import { Globe } from "lucide-react";
+
+interface LanguageSelectorProps {
+  onSelect: (language: string) => void;
+}
 
 const languages = [
-  { code: "en", name: "English", flag: "🇿🇦" },
-  { code: "zu", name: "isiZulu", flag: "🇿🇦" },
-  { code: "af", name: "Afrikaans", flag: "🇿🇦" }
+  { code: "en", name: "English", greeting: "Welcome" },
+  { code: "zu", name: "isiZulu", greeting: "Sawubona" },
+  { code: "af", name: "Afrikaans", greeting: "Welkom" },
 ];
 
-export function LanguageSelector() {
-  const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
-
+export function LanguageSelector({ onSelect }: LanguageSelectorProps) {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <Globe className="h-4 w-4" />
-          <span className="hidden sm:inline">{selectedLanguage.name}</span>
-          <span className="text-base">{selectedLanguage.flag}</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[160px]">
-        {languages.map((language) => (
-          <DropdownMenuItem
-            key={language.code}
-            onClick={() => setSelectedLanguage(language)}
-            className="flex items-center gap-3 cursor-pointer"
-          >
-            <span className="text-base">{language.flag}</span>
-            <span>{language.name}</span>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-secondary/20 via-background to-primary/10 p-4">
+      <div className="w-full max-w-md animate-fade-in">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-secondary to-primary rounded-full mb-4 shadow-xl">
+            <Globe className="w-10 h-10 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold gradient-text mb-2">TaxiConnect SA</h1>
+          <p className="text-muted-foreground">Choose your preferred language</p>
+        </div>
+
+        <div className="space-y-3">
+          {languages.map((lang) => (
+            <Card
+              key={lang.code}
+              className="card-hover cursor-pointer overflow-hidden"
+              onClick={() => onSelect(lang.code)}
+            >
+              <div className="p-6 flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">{lang.greeting}</p>
+                  <p className="text-lg font-semibold">{lang.name}</p>
+                </div>
+                <Button variant="gradient" size="sm">
+                  Select
+                </Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        <p className="text-center text-sm text-muted-foreground mt-8">
+          You can change this later in settings
+        </p>
+      </div>
+    </div>
   );
 }

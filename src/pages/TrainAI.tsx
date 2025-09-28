@@ -1,285 +1,274 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Brain, 
   MapPin, 
   DollarSign, 
-  Clock, 
-  Users,
-  Send,
+  Clock,
   CheckCircle,
-  AlertCircle,
-  Lightbulb
+  Users,
+  TrendingUp,
+  Send
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
-const recentSubmissions = [
+interface Suggestion {
+  id: string;
+  type: "route" | "fare" | "safety";
+  status: "pending" | "verified" | "rejected";
+  from?: string;
+  to?: string;
+  fare?: string;
+  description: string;
+  submittedBy: string;
+  date: string;
+  votes: number;
+}
+
+const recentSuggestions: Suggestion[] = [
   {
-    id: 1,
-    route: "Randburg → Fourways",
-    fare: "R18 - R22",
+    id: "1",
+    type: "route",
     status: "verified",
+    from: "Fourways",
+    to: "Randburg",
+    fare: "R18",
+    description: "New direct route available via William Nicol",
     submittedBy: "Community Member",
-    date: "2 days ago"
+    date: "2 days ago",
+    votes: 45,
   },
   {
-    id: 2,
-    route: "Kempton Park → OR Tambo",
-    fare: "R25 - R30",
+    id: "2",
+    type: "fare",
     status: "pending",
-    submittedBy: "TaxiUser94",
-    date: "1 day ago"
+    from: "Sandton",
+    to: "Rosebank",
+    fare: "R12",
+    description: "Fare has increased from R10 to R12",
+    submittedBy: "Regular Commuter",
+    date: "1 day ago",
+    votes: 23,
   },
   {
-    id: 3,
-    route: "Centurion → Hatfield",
-    fare: "R15 - R20",
+    id: "3",
+    type: "safety",
     status: "verified",
-    submittedBy: "Community Member",
-    date: "3 hours ago"
-  }
+    description: "New safety marshals at Park Station rank from 5 AM to 8 PM",
+    submittedBy: "Safety Officer",
+    date: "3 days ago",
+    votes: 67,
+  },
 ];
 
 export default function TrainAI() {
-  const [routeFrom, setRouteFrom] = useState("");
-  const [routeTo, setRouteTo] = useState("");
-  const [minFare, setMinFare] = useState("");
-  const [maxFare, setMaxFare] = useState("");
-  const [duration, setDuration] = useState("");
-  const [notes, setNotes] = useState("");
   const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    type: "route",
+    from: "",
+    to: "",
+    fare: "",
+    description: "",
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!routeFrom || !routeTo || !minFare || !maxFare) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Simulate submission
     toast({
-      title: "Route Submitted! 🎉",
-      description: "Thank you for helping improve our AI. Your submission will be reviewed by our team.",
+      title: "Thank you for your contribution!",
+      description: "Your suggestion will be reviewed by our team.",
     });
+    setFormData({
+      type: "route",
+      from: "",
+      to: "",
+      fare: "",
+      description: "",
+    });
+  };
 
-    // Reset form
-    setRouteFrom("");
-    setRouteTo("");
-    setMinFare("");
-    setMaxFare("");
-    setDuration("");
-    setNotes("");
+  const getStatusBadge = (status: string) => {
+    const styles = {
+      verified: "bg-success/10 text-success border-success/20",
+      pending: "bg-warning/10 text-warning border-warning/20",
+      rejected: "bg-destructive/10 text-destructive border-destructive/20",
+    };
+    return styles[status as keyof typeof styles] || "";
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <div className="p-3 rounded-full bg-gradient-warm">
-                <Brain className="h-6 w-6 text-primary-foreground" />
-              </div>
-            </div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Help Train Our AI
-            </h1>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Share your knowledge about taxi routes and fares to help our AI provide better, 
-              more accurate information to the community.
-            </p>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-secondary to-primary rounded-full mb-4 shadow-xl">
+            <Brain className="w-10 h-10 text-white" />
           </div>
+          <h1 className="text-4xl font-bold gradient-text mb-2">Help Train Our AI</h1>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Your local knowledge makes our service better for everyone. Share route updates, fare changes, and safety information.
+          </p>
+        </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Submission Form */}
-            <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-primary" />
-                  Submit Route Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Route Information */}
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">From *</label>
-                      <Input
-                        placeholder="e.g., Johannesburg CBD"
-                        value={routeFrom}
-                        onChange={(e) => setRouteFrom(e.target.value)}
-                        className="bg-background/50"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">To *</label>
-                      <Input
-                        placeholder="e.g., Soweto"
-                        value={routeTo}
-                        onChange={(e) => setRouteTo(e.target.value)}
-                        className="bg-background/50"
-                      />
-                    </div>
-                  </div>
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <Card className="p-4 text-center glass-card">
+            <Users className="w-8 h-8 mx-auto mb-2 text-primary" />
+            <p className="text-2xl font-bold">1,234</p>
+            <p className="text-sm text-muted-foreground">Contributors</p>
+          </Card>
+          <Card className="p-4 text-center glass-card">
+            <CheckCircle className="w-8 h-8 mx-auto mb-2 text-success" />
+            <p className="text-2xl font-bold">892</p>
+            <p className="text-sm text-muted-foreground">Verified Updates</p>
+          </Card>
+          <Card className="p-4 text-center glass-card">
+            <MapPin className="w-8 h-8 mx-auto mb-2 text-secondary" />
+            <p className="text-2xl font-bold">156</p>
+            <p className="text-sm text-muted-foreground">New Routes</p>
+          </Card>
+          <Card className="p-4 text-center glass-card">
+            <TrendingUp className="w-8 h-8 mx-auto mb-2 text-info" />
+            <p className="text-2xl font-bold">98%</p>
+            <p className="text-sm text-muted-foreground">Accuracy</p>
+          </Card>
+        </div>
 
-                  {/* Fare Information */}
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">Min Fare (R) *</label>
-                      <Input
-                        type="number"
-                        placeholder="15"
-                        value={minFare}
-                        onChange={(e) => setMinFare(e.target.value)}
-                        className="bg-background/50"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">Max Fare (R) *</label>
-                      <Input
-                        type="number"
-                        placeholder="20"
-                        value={maxFare}
-                        onChange={(e) => setMaxFare(e.target.value)}
-                        className="bg-background/50"
-                      />
-                    </div>
-                  </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Submission Form */}
+          <Card className="p-6 shadow-xl">
+            <h2 className="text-xl font-semibold mb-4">Submit Information</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="type">Type of Information</Label>
+                <select
+                  id="type"
+                  className="w-full mt-1 px-3 py-2 border border-input rounded-md bg-background"
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                >
+                  <option value="route">New Route</option>
+                  <option value="fare">Fare Update</option>
+                  <option value="safety">Safety Information</option>
+                </select>
+              </div>
 
-                  {/* Additional Information */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Travel Duration (optional)</label>
-                    <Input
-                      placeholder="e.g., 45 minutes"
-                      value={duration}
-                      onChange={(e) => setDuration(e.target.value)}
-                      className="bg-background/50"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Additional Notes (optional)</label>
-                    <Textarea
-                      placeholder="Share any additional information about this route, safety concerns, or tips..."
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      className="bg-background/50 min-h-[80px]"
-                    />
-                  </div>
-
-                  <Button type="submit" className="w-full bg-gradient-warm hover:shadow-medium transition-all duration-200">
-                    <Send className="h-4 w-4 mr-2" />
-                    Submit Route Information
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-
-            {/* Sidebar Information */}
-            <div className="space-y-6">
-              {/* How it Works */}
-              <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Lightbulb className="h-5 w-5 text-primary" />
-                    How It Works
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-primary/10 text-xs font-medium text-primary">
-                        1
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Submit route information based on your travel experience
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-primary/10 text-xs font-medium text-primary">
-                        2
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Our team verifies the information for accuracy
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-primary/10 text-xs font-medium text-primary">
-                        3
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Approved data helps train our AI to provide better responses
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Recent Submissions */}
-              <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-lg">Recent Community Submissions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {recentSubmissions.map((submission) => (
-                    <div key={submission.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                      <div className="flex-1">
-                        <p className="font-medium text-foreground text-sm">{submission.route}</p>
-                        <div className="flex items-center gap-4 mt-1">
-                          <div className="flex items-center gap-1">
-                            <DollarSign className="h-3 w-3 text-success" />
-                            <span className="text-xs text-muted-foreground">{submission.fare}</span>
-                          </div>
-                          <span className="text-xs text-muted-foreground">{submission.date}</span>
-                        </div>
-                      </div>
-                      <Badge 
-                        variant={submission.status === "verified" ? "default" : "outline"}
-                        className="text-xs"
-                      >
-                        {submission.status === "verified" ? (
-                          <>
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Verified
-                          </>
-                        ) : (
-                          <>
-                            <AlertCircle className="h-3 w-3 mr-1" />
-                            Pending
-                          </>
-                        )}
-                      </Badge>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              {/* Stats */}
-              <Card className="border-border/50 bg-gradient-secondary/10 backdrop-blur-sm">
-                <CardContent className="p-6 text-center">
+              {(formData.type === "route" || formData.type === "fare") && (
+                <>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-2xl font-bold text-foreground">247</p>
-                      <p className="text-sm text-muted-foreground">Routes Submitted</p>
+                      <Label htmlFor="from">From</Label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                        <Input
+                          id="from"
+                          placeholder="Starting point"
+                          value={formData.from}
+                          onChange={(e) => setFormData({ ...formData, from: e.target.value })}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-foreground">189</p>
-                      <p className="text-sm text-muted-foreground">Verified Routes</p>
+                      <Label htmlFor="to">To</Label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                        <Input
+                          id="to"
+                          placeholder="Destination"
+                          value={formData.to}
+                          onChange={(e) => setFormData({ ...formData, to: e.target.value })}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+
+                  <div>
+                    <Label htmlFor="fare">Fare (Optional)</Label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <Input
+                        id="fare"
+                        placeholder="e.g., R25"
+                        value={formData.fare}
+                        onChange={(e) => setFormData({ ...formData, fare: e.target.value })}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div>
+                <Label htmlFor="description">Additional Details</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Provide any additional information that might be helpful..."
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  rows={4}
+                />
+              </div>
+
+              <Button type="submit" variant="gradient" className="w-full">
+                <Send className="w-4 h-4 mr-2" />
+                Submit Information
+              </Button>
+            </form>
+          </Card>
+
+          {/* Recent Contributions */}
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Recent Contributions</h2>
+            <div className="space-y-4">
+              {recentSuggestions.map((suggestion) => (
+                <Card key={suggestion.id} className="p-4 card-hover">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className={getStatusBadge(suggestion.status)}>
+                        {suggestion.status}
+                      </Badge>
+                      <Badge variant="outline">
+                        {suggestion.type}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <TrendingUp className="w-3 h-3" />
+                      <span>{suggestion.votes}</span>
+                    </div>
+                  </div>
+
+                  {suggestion.from && suggestion.to && (
+                    <div className="flex items-center gap-2 mb-2 font-medium">
+                      <span>{suggestion.from}</span>
+                      <span className="text-muted-foreground">→</span>
+                      <span>{suggestion.to}</span>
+                      {suggestion.fare && (
+                        <Badge variant="secondary" className="ml-2">
+                          {suggestion.fare}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+
+                  <p className="text-sm text-muted-foreground mb-2">{suggestion.description}</p>
+
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span>{suggestion.submittedBy}</span>
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      <span>{suggestion.date}</span>
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </div>
           </div>
         </div>

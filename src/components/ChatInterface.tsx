@@ -1,24 +1,23 @@
-import { useState } from "react";
-import { Send, Bot, User, Navigation } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Send, Bot, User, MapPin, DollarSign, Shield } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Message {
   id: string;
   type: "user" | "bot";
   content: string;
   timestamp: Date;
-  showNavigate?: boolean;
-  destination?: string;
 }
 
-const quickQuestions = [
-  "Where's the nearest taxi to Sandton?",
-  "How much does it cost to get to Soweto?",
-  "Are there any strikes today?",
-  "Safe routes to the airport?"
+const suggestions = [
+  "Where can I get a taxi to Sandton?",
+  "How much from Braamfontein to Soweto?",
+  "Is it safe to travel at night?",
+  "Show me routes from my location",
 ];
 
 export function ChatInterface() {
@@ -26,174 +25,206 @@ export function ChatInterface() {
     {
       id: "1",
       type: "bot",
-      content: "Sawubona! 👋 I'm your AI transport assistant. Ask me about taxi routes, fares, or safety information. How can I help you today?",
-      timestamp: new Date()
-    }
+      content: "Sawubona! 👋 I'm your TaxiConnect assistant. Ask me about routes, fares, or safety tips. How can I help you today?",
+      timestamp: new Date(),
+    },
   ]);
-  const [inputValue, setInputValue] = useState("");
+  const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSend = () => {
+    if (!input.trim()) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       type: "user",
-      content: inputValue,
-      timestamp: new Date()
+      content: input,
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue("");
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
     setIsTyping(true);
 
-    // Simulate AI response with route information
+    // Simulate bot response
     setTimeout(() => {
-      const isRouteQuery = userMessage.content.toLowerCase().includes('route') || 
-                          userMessage.content.toLowerCase().includes('taxi') ||
-                          userMessage.content.toLowerCase().includes('to ');
-      
-      const botMessage: Message = {
+      const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         type: "bot",
-        content: isRouteQuery 
-          ? "🚐 Route to Sandton City: Take a taxi from Bree Street Taxi Rank. Fare: R15-20. Duration: ~25 minutes. This route is safe and frequently used."
-          : "I understand you're looking for transport information. Currently, I'm in training mode - our team is working hard to connect me with real-time taxi data. Soon I'll be able to help you with live routes, fares, and safety updates! 🚐✨",
+        content: getBotResponse(input),
         timestamp: new Date(),
-        showNavigate: isRouteQuery,
-        destination: isRouteQuery ? "Sandton City" : undefined
       };
-      setMessages(prev => [...prev, botMessage]);
+      setMessages((prev) => [...prev, botResponse]);
       setIsTyping(false);
     }, 1500);
   };
 
-  const handleQuickQuestion = (question: string) => {
-    setInputValue(question);
+  const getBotResponse = (query: string) => {
+    const lowerQuery = query.toLowerCase();
+    
+    if (lowerQuery.includes("braamfontein") && lowerQuery.includes("honeydew")) {
+      return "🚕 From Braamfontein to Honeydew:\n\n📍 **Nearest taxi rank:** Braamfontein Taxi Rank (corner Juta & De Korte St)\n💰 **Fare:** R25-30\n⏱️ **Travel time:** 35-45 minutes\n🛤️ **Route:** Via Republic Rd and Beyers Naude Dr\n\n⚠️ **Tip:** Morning rush hour (6:30-9:00) may add 15-20 minutes to your journey.";
+    }
+    
+    if (lowerQuery.includes("safe") || lowerQuery.includes("night")) {
+      return "🛡️ **Safety Tips for Night Travel:**\n\n✅ Travel in groups when possible\n✅ Use well-known taxi ranks\n✅ Keep valuables hidden\n✅ Share your trip details with someone\n✅ Sit near the driver\n✅ Trust your instincts\n\n📱 Emergency: Save 10111 (Police) and 10177 (Ambulance) in your phone.";
+    }
+    
+    if (lowerQuery.includes("fare") || lowerQuery.includes("price") || lowerQuery.includes("cost")) {
+      return "💰 **Common Taxi Fares:**\n\n• Short distance (5-10km): R12-15\n• Medium distance (10-20km): R20-30\n• Long distance (20km+): R35-50\n\n💡 **Note:** Fares may vary based on time of day and specific routes. Always confirm with the driver before boarding.";
+    }
+    
+    return "I understand you're asking about: \"" + query + "\". Let me help you with taxi information. You can ask me about:\n\n📍 Routes and directions\n💰 Fare estimates\n🛡️ Safety tips\n⏱️ Travel times\n🚕 Nearest taxi ranks\n\nWhat specific information would you like?";
   };
 
-  const handleNavigate = (destination: string) => {
-    // Open Google Maps with directions
-    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}&travelmode=transit`;
-    window.open(googleMapsUrl, '_blank');
+  const handleSuggestionClick = (suggestion: string) => {
+    setInput(suggestion);
   };
 
   return (
-    <div className="flex flex-col h-full max-h-[600px] bg-card rounded-2xl shadow-medium border border-border/50">
-      {/* Chat Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-border/50 bg-gradient-warm rounded-t-2xl">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-foreground/20">
-          <Bot className="h-6 w-6 text-primary-foreground" />
+    <div className="flex flex-col h-[calc(100vh-5rem)] max-w-4xl mx-auto p-4">
+      <Card className="flex-1 flex flex-col overflow-hidden shadow-xl">
+        {/* Chat Header */}
+        <div className="bg-gradient-to-r from-secondary to-primary p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+              <Bot className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-white font-semibold">TaxiConnect Assistant</h2>
+              <p className="text-white/80 text-sm">Always here to help you travel safely</p>
+            </div>
+          </div>
         </div>
-        <div>
-          <h2 className="font-semibold text-primary-foreground">AI Transport Assistant</h2>
-          <p className="text-sm text-primary-foreground/80">Ask me anything about taxis</p>
-        </div>
-      </div>
 
-      {/* Messages */}
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex items-start gap-3 ${
-                message.type === "user" ? "flex-row-reverse" : ""
-              }`}
-            >
-              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                message.type === "user" 
-                  ? "bg-gradient-accent text-accent-foreground" 
-                  : "bg-gradient-secondary text-secondary-foreground"
-              }`}>
-                {message.type === "user" ? (
-                  <User className="h-4 w-4" />
-                ) : (
-                  <Bot className="h-4 w-4" />
+        {/* Messages */}
+        <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+          <div className="space-y-4">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={cn(
+                  "flex items-start gap-3 chat-bubble-enter",
+                  message.type === "user" && "flex-row-reverse"
                 )}
-              </div>
-              <div className={`max-w-[70%] ${message.type === "user" ? "text-right" : ""}`}>
+              >
                 <div
-                  className={`rounded-2xl px-4 py-2 text-sm ${
-                    message.type === "user"
-                      ? "bg-gradient-accent text-accent-foreground ml-auto"
-                      : "bg-muted text-muted-foreground"
-                  }`}
+                  className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+                    message.type === "bot"
+                      ? "bg-gradient-to-br from-secondary to-primary"
+                      : "bg-accent"
+                  )}
                 >
-                  {message.content}
+                  {message.type === "bot" ? (
+                    <Bot className="w-5 h-5 text-white" />
+                  ) : (
+                    <User className="w-5 h-5 text-accent-foreground" />
+                  )}
                 </div>
-                {message.showNavigate && message.destination && (
-                  <div className="mt-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleNavigate(message.destination!)}
-                      className="gap-2 hover:bg-primary hover:text-primary-foreground transition-colors"
-                    >
-                      <Navigation className="h-3 w-3" />
-                      Navigate
-                    </Button>
+                <div
+                  className={cn(
+                    "max-w-[70%] rounded-2xl p-3 shadow-sm",
+                    message.type === "bot"
+                      ? "bg-card border border-border"
+                      : "bg-primary text-primary-foreground"
+                  )}
+                >
+                  <p className="text-sm whitespace-pre-line">{message.content}</p>
+                  <p
+                    className={cn(
+                      "text-xs mt-1",
+                      message.type === "bot" ? "text-muted-foreground" : "text-primary-foreground/70"
+                    )}
+                  >
+                    {message.timestamp.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+              </div>
+            ))}
+            {isTyping && (
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-white" />
+                </div>
+                <div className="bg-card border border-border rounded-2xl p-3">
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
+                    <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></span>
+                    <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
                   </div>
-                )}
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </p>
-              </div>
-            </div>
-          ))}
-          
-          {isTyping && (
-            <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-secondary text-secondary-foreground">
-                <Bot className="h-4 w-4" />
-              </div>
-              <div className="rounded-2xl bg-muted px-4 py-2 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <div className="h-2 w-2 rounded-full bg-muted-foreground/50 animate-pulse"></div>
-                  <div className="h-2 w-2 rounded-full bg-muted-foreground/50 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                  <div className="h-2 w-2 rounded-full bg-muted-foreground/50 animate-pulse" style={{ animationDelay: '0.4s' }}></div>
                 </div>
               </div>
+            )}
+          </div>
+        </ScrollArea>
+
+        {/* Suggestions */}
+        {messages.length === 1 && (
+          <div className="px-4 pb-2">
+            <p className="text-xs text-muted-foreground mb-2">Quick questions:</p>
+            <div className="flex flex-wrap gap-2">
+              {suggestions.map((suggestion) => (
+                <Button
+                  key={suggestion}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                >
+                  {suggestion}
+                </Button>
+              ))}
             </div>
-          )}
-        </div>
-      </ScrollArea>
+          </div>
+        )}
 
-      {/* Quick Questions */}
-      <div className="p-4 border-t border-border/50">
-        <p className="text-xs text-muted-foreground mb-2">Quick questions:</p>
-        <div className="flex flex-wrap gap-2 mb-3">
-          {quickQuestions.map((question, index) => (
-            <Button
-              key={index}
-              variant="outline"
-              size="sm"
-              className="text-xs h-8 rounded-full"
-              onClick={() => handleQuickQuestion(question)}
-            >
-              {question}
+        {/* Input */}
+        <div className="border-t border-border p-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSend();
+            }}
+            className="flex gap-2"
+          >
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask about routes, fares, or safety..."
+              className="flex-1"
+            />
+            <Button type="submit" variant="gradient" size="icon">
+              <Send className="w-4 h-4" />
             </Button>
-          ))}
+          </form>
         </div>
-      </div>
+      </Card>
 
-      {/* Input */}
-      <div className="flex items-center gap-2 p-4 bg-muted/30 rounded-b-2xl">
-        <Input
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Ask about routes, fares, or safety..."
-          className="border-0 bg-background/50 focus-visible:ring-primary"
-          onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-        />
-        <Button 
-          onClick={handleSendMessage}
-          size="icon"
-          className="bg-gradient-warm hover:shadow-medium transition-all duration-200"
-          disabled={!inputValue.trim() || isTyping}
-        >
-          <Send className="h-4 w-4" />
-        </Button>
+      {/* Feature Pills */}
+      <div className="flex justify-center gap-4 mt-4">
+        <div className="flex items-center gap-2 px-3 py-1 bg-card rounded-full border border-border text-sm">
+          <MapPin className="w-3 h-3 text-primary" />
+          <span className="text-muted-foreground">Live Routes</span>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1 bg-card rounded-full border border-border text-sm">
+          <DollarSign className="w-3 h-3 text-secondary" />
+          <span className="text-muted-foreground">Fair Prices</span>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1 bg-card rounded-full border border-border text-sm">
+          <Shield className="w-3 h-3 text-success" />
+          <span className="text-muted-foreground">Safe Travel</span>
+        </div>
       </div>
     </div>
   );

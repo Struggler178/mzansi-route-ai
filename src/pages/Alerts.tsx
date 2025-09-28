@@ -1,201 +1,246 @@
-import { AlertCard } from "@/components/AlertCard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   AlertTriangle, 
-  Shield, 
-  MapPin, 
+  Info, 
+  CheckCircle, 
+  XCircle,
+  Clock,
+  MapPin,
   Bell,
-  RefreshCw,
-  Filter
+  BellOff
 } from "lucide-react";
+import { useState } from "react";
 
-const activeAlerts = [
+interface Alert {
+  id: string;
+  type: "strike" | "closure" | "safety" | "info";
+  severity: "high" | "medium" | "low";
+  title: string;
+  description: string;
+  location: string;
+  time: string;
+  active: boolean;
+}
+
+const mockAlerts: Alert[] = [
   {
-    type: "strike" as const,
-    title: "Major Taxi Strike - Johannesburg",
-    description: "Multiple taxi associations participating in strike action. Avoid CBD routes, use alternative transport.",
-    location: "Johannesburg CBD, Braamfontein",
+    id: "1",
+    type: "strike",
+    severity: "high",
+    title: "Taxi Strike - Johannesburg CBD",
+    description: "Major taxi associations are on strike. Avoid CBD area. Alternative transport recommended.",
+    location: "Johannesburg CBD",
     time: "2 hours ago",
-    severity: "high" as const
+    active: true,
   },
   {
-    type: "closure" as const,
-    title: "N1 Highway Closure",
-    description: "Accident cleanup in progress. Expect delays of up to 60 minutes.",
-    location: "N1 North, near Midrand",
-    time: "30 minutes ago",
-    severity: "high" as const
+    id: "2",
+    type: "closure",
+    severity: "medium",
+    title: "M1 Highway Partial Closure",
+    description: "Roadworks on M1 North between Corlett Drive and William Nicol. Expect delays.",
+    location: "M1 Highway North",
+    time: "5 hours ago",
+    active: true,
   },
   {
-    type: "route" as const,
-    title: "Service Disruption",
-    description: "Limited service on Route 23 due to vehicle maintenance.",
-    location: "Cape Town - Bellville",
-    time: "1 hour ago",
-    severity: "medium" as const
-  }
-];
-
-const safetyAlerts = [
-  {
-    type: "route" as const,
-    title: "High Crime Area Warning",
-    description: "Increased criminal activity reported. Travel in groups and avoid late evening trips.",
+    id: "3",
+    type: "safety",
+    severity: "high",
+    title: "Safety Alert - Alexandra",
+    description: "Reports of unrest in Alexandra. Travelers advised to use alternative routes.",
     location: "Alexandra Township",
-    time: "6 hours ago",
-    severity: "high" as const
+    time: "1 hour ago",
+    active: true,
   },
   {
-    type: "route" as const,
-    title: "Road Condition Alert",
-    description: "Poor road conditions due to recent rainfall. Drive carefully.",
-    location: "Soweto - Orlando",
-    time: "8 hours ago",
-    severity: "medium" as const
-  }
-];
-
-const routeUpdates = [
-  {
-    type: "route" as const,
-    title: "New Express Route",
-    description: "New express service from Pretoria to Johannesburg during peak hours.",
-    location: "Pretoria - Johannesburg",
+    id: "4",
+    type: "info",
+    severity: "low",
+    title: "New Taxi Rank Opening",
+    description: "New taxi rank opening in Midrand next week. Better connections to Pretoria.",
+    location: "Midrand",
     time: "1 day ago",
-    severity: "low" as const
+    active: false,
   },
-  {
-    type: "route" as const,
-    title: "Fare Adjustment",
-    description: "Route fares updated to reflect current fuel costs.",
-    location: "Durban Metro Routes",
-    time: "2 days ago",
-    severity: "medium" as const
-  }
 ];
 
 export default function Alerts() {
+  const [notifications, setNotifications] = useState(true);
+  const [activeFilter, setActiveFilter] = useState<"all" | "active" | "resolved">("all");
+
+  const getAlertIcon = (type: string) => {
+    switch (type) {
+      case "strike":
+        return <AlertTriangle className="w-5 h-5" />;
+      case "closure":
+        return <XCircle className="w-5 h-5" />;
+      case "safety":
+        return <AlertTriangle className="w-5 h-5" />;
+      case "info":
+        return <Info className="w-5 h-5" />;
+      default:
+        return <Info className="w-5 h-5" />;
+    }
+  };
+
+  const getAlertColor = (type: string, severity: string) => {
+    if (type === "info") return "bg-info/10 text-info border-info/20";
+    if (severity === "high") return "bg-destructive/10 text-destructive border-destructive/20";
+    if (severity === "medium") return "bg-warning/10 text-warning border-warning/20";
+    return "bg-muted text-muted-foreground border-muted";
+  };
+
+  const getSeverityBadge = (severity: string) => {
+    const colors = {
+      high: "bg-destructive text-destructive-foreground",
+      medium: "bg-warning text-warning-foreground",
+      low: "bg-success text-success-foreground",
+    };
+    return colors[severity as keyof typeof colors] || "";
+  };
+
+  const filteredAlerts = mockAlerts.filter((alert) => {
+    if (activeFilter === "all") return true;
+    if (activeFilter === "active") return alert.active;
+    if (activeFilter === "resolved") return !alert.active;
+    return true;
+  });
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
-                Live Alerts & Updates
-              </h1>
-              <p className="text-muted-foreground">
-                Stay informed about strikes, closures, and safety information
-              </p>
+              <h1 className="text-4xl font-bold gradient-text mb-2">Live Alerts</h1>
+              <p className="text-muted-foreground">Stay informed about strikes, closures, and safety</p>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
-                <Filter className="h-4 w-4 mr-2" />
-                Filter
-              </Button>
-              <Button variant="ghost" size="sm">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
-            </div>
+            <Button
+              variant={notifications ? "gradient" : "outline"}
+              onClick={() => setNotifications(!notifications)}
+            >
+              {notifications ? (
+                <>
+                  <Bell className="w-4 h-4 mr-2" />
+                  Notifications On
+                </>
+              ) : (
+                <>
+                  <BellOff className="w-4 h-4 mr-2" />
+                  Notifications Off
+                </>
+              )}
+            </Button>
           </div>
 
-          {/* Status Bar */}
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm mb-8">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <div className="h-3 w-3 rounded-full bg-destructive animate-pulse"></div>
-                    <span className="text-sm font-medium">3 Active Alerts</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-warning" />
-                    <span className="text-sm text-muted-foreground">2 Safety Warnings</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Bell className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Last updated: 2 min ago</span>
-                </div>
-              </div>
-            </CardContent>
+          {/* Filter Tabs */}
+          <div className="flex gap-2">
+            <Button
+              variant={activeFilter === "all" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveFilter("all")}
+            >
+              All Alerts
+            </Button>
+            <Button
+              variant={activeFilter === "active" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveFilter("active")}
+            >
+              Active
+            </Button>
+            <Button
+              variant={activeFilter === "resolved" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveFilter("resolved")}
+            >
+              Resolved
+            </Button>
+          </div>
+        </div>
+
+        {/* Alert Stats */}
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          <Card className="p-4 text-center glass-card">
+            <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-destructive" />
+            <p className="text-2xl font-bold">2</p>
+            <p className="text-sm text-muted-foreground">Critical Alerts</p>
           </Card>
-
-          {/* Alert Tabs */}
-          <Tabs defaultValue="active" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3 bg-muted/50">
-              <TabsTrigger value="active" className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                Active Alerts
-                <Badge variant="destructive" className="text-xs px-1.5 py-0.5">
-                  {activeAlerts.length}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="safety" className="flex items-center gap-2">
-                <Shield className="h-4 w-4" />
-                Safety
-                <Badge variant="outline" className="text-xs px-1.5 py-0.5">
-                  {safetyAlerts.length}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="routes" className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                Route Updates
-                <Badge variant="outline" className="text-xs px-1.5 py-0.5">
-                  {routeUpdates.length}
-                </Badge>
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="active" className="space-y-4">
-              {activeAlerts.map((alert, index) => (
-                <AlertCard key={index} {...alert} />
-              ))}
-            </TabsContent>
-
-            <TabsContent value="safety" className="space-y-4">
-              {safetyAlerts.map((alert, index) => (
-                <AlertCard key={index} {...alert} />
-              ))}
-            </TabsContent>
-
-            <TabsContent value="routes" className="space-y-4">
-              {routeUpdates.map((alert, index) => (
-                <AlertCard key={index} {...alert} />
-              ))}
-            </TabsContent>
-          </Tabs>
-
-          {/* Emergency Section */}
-          <Card className="border-destructive/20 bg-destructive/5 mt-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-destructive">
-                <AlertTriangle className="h-5 w-5" />
-                Emergency Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                In case of emergency while traveling, contact these numbers:
-              </p>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="flex items-center justify-between bg-background/50 rounded-lg p-3">
-                  <span className="text-sm font-medium">Police Emergency</span>
-                  <span className="text-sm font-mono bg-muted px-2 py-1 rounded">10111</span>
-                </div>
-                <div className="flex items-center justify-between bg-background/50 rounded-lg p-3">
-                  <span className="text-sm font-medium">Medical Emergency</span>
-                  <span className="text-sm font-mono bg-muted px-2 py-1 rounded">10177</span>
-                </div>
-              </div>
-            </CardContent>
+          <Card className="p-4 text-center glass-card">
+            <Info className="w-8 h-8 mx-auto mb-2 text-warning" />
+            <p className="text-2xl font-bold">1</p>
+            <p className="text-sm text-muted-foreground">Warnings</p>
+          </Card>
+          <Card className="p-4 text-center glass-card">
+            <CheckCircle className="w-8 h-8 mx-auto mb-2 text-success" />
+            <p className="text-2xl font-bold">1</p>
+            <p className="text-sm text-muted-foreground">Resolved</p>
           </Card>
         </div>
+
+        {/* Alerts List */}
+        <div className="space-y-4">
+          {filteredAlerts.map((alert) => (
+            <Card 
+              key={alert.id} 
+              className={`p-6 card-hover ${alert.active ? "" : "opacity-60"}`}
+            >
+              <div className="flex items-start gap-4">
+                <div className={`p-2 rounded-lg ${getAlertColor(alert.type, alert.severity)}`}>
+                  {getAlertIcon(alert.type)}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <h3 className="font-semibold text-lg mb-1">{alert.title}</h3>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className={getSeverityBadge(alert.severity)}>
+                          {alert.severity.toUpperCase()}
+                        </Badge>
+                        {alert.active ? (
+                          <Badge variant="outline" className="bg-success/10 text-success border-success/20">
+                            ACTIVE
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-muted text-muted-foreground">
+                            RESOLVED
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <p className="text-muted-foreground mb-3">{alert.description}</p>
+                  
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      <span>{alert.location}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      <span>{alert.time}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        {filteredAlerts.length === 0 && (
+          <Card className="p-12 text-center">
+            <CheckCircle className="w-12 h-12 mx-auto mb-4 text-success" />
+            <h3 className="text-lg font-semibold mb-2">No alerts to show</h3>
+            <p className="text-muted-foreground">
+              All clear! No active alerts in your area.
+            </p>
+          </Card>
+        )}
       </div>
     </div>
   );
